@@ -1,0 +1,16 @@
+name: sacapp
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python>=3.6
+  - pip
+  - cython>=0.28
+  - pyyaml
+  - flask==0.12.2
+  - pytorch=0.3.1
+  - pip:
+    - gunicorn>=19.8
+    - plotly>=3.4
+    - pandas
+prefix: /Users/ZeoChoy/anaconda/envs/sacapp

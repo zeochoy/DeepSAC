@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/materia/bootstrap.min.css" rel="stylesheet" integrity="sha384-5bFGNjwF8onKXzNbIcKR8ABhxicw+SC1sjTh6vhSbIbtVgUuVTm2qBZ4AaHc7Xr9" crossorigin="anonymous">
+    <link rel="stylesheet" href="static/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Bootstrap JS -->
+    <!--<script type="text/javascript" src="static/js/jquery.min.js"></script>-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>-->
+    <!---<script type="text/javascript" src="static/js/app.js"></script>-->
+    <!-- Bootstrap.js -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <!-- jQuery autocomplete-->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- DataTable.js -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+        <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <title>DeepSAC</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+      <a class="navbar-brand py-0" href="#">DeepSAC</a>
+      <span class="navbar-text py-0">Deep Learning Model for Sequential Application of Chemotherapeutics</span>
+    </nav>
+    <div class="container-fluid h-100">
+      <div class="row">
+        <!-- Left Panel -->
+        <div class="col-lg-4" id="left" style="max-width:300px;margin-top:30px;margin-left:10px">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active show" data-toggle="tab" href="#deepsac-tab">DeepSAC</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#pert-tab">Pertubation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#dr-tab">IC50</a>
+            </li>
+          </ul>
+          <div id="myTabContent" class="tab-content">
+            <!--DeepSAC form-->
+            <div class="tab-pane fade active show" id="deepsac-tab">
+              <br>
+              <form id="predict" enctype="multipart/form-data">
+                <label class="col-form-label" for="sacinput">Cell Line</label>
+                <input name="sacinput" type="text" class="form-control" placeholder="e.g. HEPG2" id="sacinput"/>
+                <br>
+                <input class="btn btn-primary" type="submit" value="Submit" id="sacsubmit"/>
+              </form>
+            </div>
+            <!--end of DeepSAC form-->
+            <!--perturbation viewer form-->
+            <div class="tab-pane fade active show" id="pert-tab">
+              <br>
+              <form id="pertpredict" enctype="multipart/form-data">
+                <label class="col-form-label" for="sacinput">Cell Line</label>
+                <input name="pertclinput" type="text" class="form-control" placeholder="e.g. HEPG2" id="pertclinput"/>
+                <br>
+                <label class="col-form-label" for="drinput">Potentiator</label>
+                <input name="pertinput" type="text" class="form-control" placeholder="e.g. entinostat" id="pertinput"/>
+                <br>
+                <label class="col-form-label" for="drinput">Drug</label>
+                <input name="pertdruginput" type="text" class="form-control" placeholder="e.g. gsk429286a" id="pertdruginput"/>
+                <br>
+                <input class="btn btn-primary" type="submit" value="Submit" id="pertsubmit"/>
+              </form>
+            </div>
+            <!--end of perturbation viewer form-->
+            <!--IC50 explorer form-->
+            <div class="tab-pane fade" id="dr-tab">
+              <br>
+              <form id="drexplorer" enctype="multipart/form-data">
+                <label class="col-form-label" for="drinput">Drug</label>
+                <input name="drinput" type="text" class="form-control" placeholder="e.g. gefitinib" id="drinput"/>
+                <br>
+                <input class="btn btn-primary" type="submit" value="Submit" id="drsubmit"/>
+              </form>
+            </div>
+            <!--end of IC50 explorer form-->
+          </div>
+        </div>
+        <!-- Left Panel -->
+
+        <!-- Right Panel -->
+        <div class="col-lg-8" style="max-width:800px">
+          <div class="status-area"  style="margin-top:40px; margin-bottom:30px; margin-left:10px">
+            <span class="status"></span>
+            <br>
+            <span class="status-table"></span>
+            <br>
+            <span class="status-plotly">
+              <div id="plotly"></div>
+            </span>
+          </div>
+        </div>
+        <!-- End of Right Panel -->
+        <!--DeepSAC form js-->
+        <script type="text/javascript">
+        $('#predict').submit(function(event) {
+            event.preventDefault();
+            var value = $("#sacinput").val()
+            $('.status').html()
+            $('.status-plotly').html(
+              `<div id="plotly"></div>`
+            );
+            $('.status-table').html()
+            $('.status').html(
+                `<div class="loader"></div><br>
+                <p class="lead">Processing...<br>It may take a few minutes...</p>`
+            );
+
+            $.ajax({
+              url: "/predict",
+              type: "post",
+              data: {sacinput:value},
+              success: function(responseData) {
+                $('.status').html(
+                    `<h2>${value}</h2>`
+                )
+
+                $('.status-table').html(responseData["dfHTML"])
+                $('#datatable').dataTable( {} )
+
+                var graph = JSON.parse(responseData["graphJSON"])
+                Plotly.plot('plotly', graph, {});
+              },
+              error: function() {
+                $('.status').html(
+                    `<span class='eval failure'><p class="lead">Something went wrong, try again later.</p></span>`
+                );
+              }
+            });
+        });
+        </script>
+        <!--end of DeepSAC form js-->
+
+        <!--perturbation viewer form js-->
+        <script type="text/javascript">
+        $('#pertpredict').submit(function(event) {
+            event.preventDefault();
+            var cl = $("#pertclinput").val()
+            var pert = $("#pertinput").val()
+            var drug = $("#pertdruginput").val()
+            $('.status').html(``)
+            $('.status-plotly').html(
+              `<span style="max-width:400px" id="plotly-hm"></span>
+              <span style="max-width:600px" id="plotly-sc"></span>`
+            );
+            $('.status-table').html(``)
+            $('.status').html(
+                `<div class="loader"></div><br>
+                <p class="lead">Processing...<br>It may take a few minutes...</p>`
+            );
+
+            $.ajax({
+              url: "/pertpredict",
+              type: "post",
+              data: {pertclinput:cl, pertinput:pert, pertdruginput:drug},
+              success: function(responseData) {
+                $('.status').html(``)
+
+                var hm = JSON.parse(responseData["hmJSON"])
+                Plotly.plot('plotly-hm', hm, {})
+
+                var sc = JSON.parse(responseData["scJSON"])
+                Plotly.plot('plotly-sc', sc, {});
+              },
+              error: function() {
+                $('.status').html(
+                    `<span class='eval failure'><p class="lead">Something went wrong, try again later.</p></span>`
+                );
+              }
+            });
+        });
+        </script>
+        <!--end of perturbation viewer form js-->
+
+        <!--IC50 explorer form js-->
+        <script type="text/javascript">
+        $('#drexplorer').submit(function(event) {
+            event.preventDefault();
+            var value = $("#drinput").val()
+            $('.status').html(``)
+            $('.status-plotly').html(
+              `<div id="plotly"></div>`
+            );
+            $('.status-table').html(``)
+            $('.status').html(
+                `<div class="loader"></div><br>
+                <p class="lead">Processing...<br>It may take a few minutes...</p>`
+            );
+
+            $.ajax({
+              url: "/drexplorer",
+              type: "post",
+              data: {drinput:value},
+              success: function(responseData) {
+                $('.status').html(``)
+
+                var graph = JSON.parse(responseData["graphJSON"])
+                Plotly.plot('plotly', graph.data, graph.layout || {});
+              },
+              error: function() {
+                $('.status').html(
+                    `<span class='eval failure'><p class="lead">Something went wrong, try again later.</p></span>`
+                );
+              }
+            });
+        });
+        </script>
+        <!--end of IC50 explorer form js-->
+
+        <!--autocomplete js-->
+        <script type="text/javascript">
+        $(function() {
+        $.ajax({
+            url: '/_autocomplete'
+            }).done(function (data){
+                $('#sacinput').autocomplete({
+                    source: data,
+                    minLength: 2
+                });
+            });
+        });
+
+        $(function() {
+        $.ajax({
+            url: '/_pert-cl-autocomplete'
+            }).done(function (data){
+                $('#pertclinput').autocomplete({
+                    source: data,
+                    minLength: 2
+                });
+            });
+        });
+
+        $(function() {
+        $.ajax({
+            url: '/_pert-autocomplete'
+            }).done(function (data){
+                $('#pertinput').autocomplete({
+                    source: data,
+                    minLength: 2
+                });
+            });
+        });
+
+        $(function() {
+        $.ajax({
+            url: '/_pert-drug-autocomplete'
+            }).done(function (data){
+                $('#pertdruginput').autocomplete({
+                    source: data,
+                    minLength: 2
+                });
+            });
+        });
+
+        $(function() {
+        $.ajax({
+            url: '/_dr-autocomplete'
+            }).done(function (data){
+                $('#drinput').autocomplete({
+                    source: data,
+                    minLength: 2
+                });
+            });
+        });
+        </script>
+        <!--end of autocomplete js-->
+      </div>
+    </div>
+  </body>
+</html>

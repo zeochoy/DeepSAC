@@ -1,0 +1,14 @@
+DEBUG = True
+PORT = 5000
+UPLOAD_FOLDER = 'sacapp/static/tmp'
+MODEL_FOLDER = 'model/'
+DRUG2ID_FILE = 'model/drug2id.txt'
+GENE2ID_FILE = 'model/gene2idx.txt'
+IC50_DRUGS_FILE = 'model/ic50_drugid.txt'
+IC50_DRUG2ID_FILE = 'model/ic50_drug2idx.txt'
+IC50_GENES_FILE = 'model/ic50_genes.txt'
+PERT_DRUGS_FILE = 'model/pert_drugid.txt'
+PERT_DRUG2ID_FILE = 'model/pert_drug2idx.txt'
+CCLE_RPKM_FILE = 'model/ccle_rpkm.csv'
+CELL_LINES_FILE = 'model/cell_lines.txt'
+GDSC_FILE = 'model/ccle_gdsc.csv'

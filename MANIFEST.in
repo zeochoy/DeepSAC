@@ -1,0 +1,2 @@
+recursive-include sacapp/templates *
+recursive-include sacapp/static *
